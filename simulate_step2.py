@@ -86,8 +86,9 @@ def get_STL(path, num_batch):
 # In[ ]:
 
 
-source_data_path = "source data path"#"/data4/wangpengxiao/danbooru2017/original"
-STL_path = "STL result path"#"/data4/wangpengxiao/danbooru2017/original_STL"
+# source_data_path = "source data path"#"/data4/wangpengxiao/danbooru2017/original"
+source_data_path = "/home/ubuntu/data/processed/yumi/color"
+STL_path = "/home/ubuntu/data/processed/yumi/stl"#"/data4/wangpengxiao/danbooru2017/original_STL"
 
 source_img_path = glob.glob(osp.join(source_data_path,'*/*.jpg'))
 source_img_path += glob.glob(osp.join(source_data_path,'*/*.png'))

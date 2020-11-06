@@ -20,13 +20,13 @@ def split_ids(ids, n=2):
     return ((id, i) for i in range(n) for id in ids)
 
 
-def to_cropped_imgs(ids, dir, suffix, scale):
+def to_cropped_imgs(ids, dir, suffix, scale): # 임의로 resize해서 crop함
     """From a list of tuples, returns the correct cropped img"""
     for id, pos in ids:
         im = resize_and_crop(Image.open(dir + id + suffix), scale=scale)
         yield get_square(im, pos)
 
-def get_imgs_and_masks(ids, dir_img, dir_mask, scale):
+def get_imgs_and_masks(ids, dir_img, dir_mask, scale): # img를 변환(HWC->CHW)하고 정규화함, crop한 이미지 만큼 마스크를 뗴어님
     """Return all the couples (img, mask)"""
 
     imgs = to_cropped_imgs(ids, dir_img, '.jpg', scale)

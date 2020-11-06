@@ -4,6 +4,8 @@ import random
 import numpy as np
 import cv2
 
+# img : p
+# color_aug()
 
 def color_aug(img, random_h=36, random_l=50, random_s=50):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2HLS).astype(float)

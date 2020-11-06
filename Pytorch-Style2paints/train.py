@@ -36,35 +36,56 @@ from dataset_multi import ClothDataSet
 from tensorboardX import SummaryWriter
 writer = SummaryWriter()
 
+# In[ ]:
+#################=================== paths ===================#################
+region_picture_path = "/home/ubuntu/data/processed/yumi/region_picture" # line 41 # region_patch_save_path
+source_data_path = "/home/ubuntu/data/processed/yumi/train/color" # line 166 #"/data4/wangpengxiao/danbooru2017/original"
+random_crop_path = "/home/ubuntu/data/processed/yumi/crop_picture" # line 181 #"/data4/wangpengxiao/zalando_random_crop"
+patch_path = "/home/ubuntu/data/processed/yumi/patch_picture" # line 182 #"/data4/wangpengxiao/zalando_center_patch"
+#     'train_path' : '/home/ubuntu/data/processed/yumi/train/color',#'/data4/wangpengxiao/danbooru2017/original/train',
+#     'val_path' : '/home/ubuntu/data/processed/yumi/val/color',#'/data4/wangpengxiao/danbooru2017/original/val',
+#     'sketch_path' : '/home/ubuntu/data/processed/yumi/train/sketch',#"/data4/wangpengxiao/danbooru2017/original_sketch",
+#     'draft_path' : 'STL path',#"/data4/wangpengxiao/danbooru2017/original_STL",
+    # 'save_path' : '/home/ubuntu/data/processed/yumi/save',#"/data4/wangpengxiao/danbooru2017/result" ,
+#################=================== paths ===================#################
+
 
 args = easydict.EasyDict({
-    'epochs' : 100,
+    'epochs' : 200, # 100으로 되어있었는데, yumi data set에 대해서.. 200으로 설정해둠
     'batch_size' : 16,
-    'train_path' : 'train data path'#'/data4/wangpengxiao/danbooru2017/original/train',
-    'val_path' : 'val data path'#'/data4/wangpengxiao/danbooru2017/original/val',
-    'sketch_path' : 'sketch path'#"/data4/wangpengxiao/danbooru2017/original_sketch",
-    'draft_path' : 'STL path'#"/data4/wangpengxiao/danbooru2017/original_STL",
-    'save_path' : 'result path'#"/data4/wangpengxiao/danbooru2017/result" ,
-    'img_size' : 270,
+    'train_path' : '/home/ubuntu/data/processed/yumi/train/color',#'/data4/wangpengxiao/danbooru2017/original/train',
+    'val_path' : '/home/ubuntu/data/processed/yumi/val/color',#'/data4/wangpengxiao/danbooru2017/original/val',
+    'sketch_path' : '/home/ubuntu/data/processed/yumi/train/sketch',#"/data4/wangpengxiao/danbooru2017/original_sketch",
+    ## 어떻게 생성하는지 알아내기
+    'draft_path' : '/home/ubuntu/data/processed/yumi/draft_path',#"/data4/wangpengxiao/danbooru2017/original_STL",
+    ## 저장할 장소 **
+    'save_path' : '/home/ubuntu/data/processed/yumi/save_path',#"/data4/wangpengxiao/danbooru2017/result" ,
+    'img_size' : 256,
     're_size' : 256,
     'learning_rate' : 1e-5,#changed
-    'gpus' : '[0,1,2,3]',
-    'lr_steps' : [5, 10, 15, 20],
+    'gpus' : '[0]', # 값을 수정해줘야 함! '[0,1,2,3]',
+    'lr_steps' : [5, 10, 15, 20], # learning decay등 반영
     "lr_decay" : 0.1,
     'lamda_L1' : 0.01,#changed
-    'workers' : 16,
+    'workers' : 4, # 16으로 써져 있음 -> 현재 directory가 4개 이므로 4로 설정
     'weight_decay' : 1e-4
 })
 
 
-Unet = UNet(in_channels=4, out_channels=3)
+Unet = UNet(in_channels=4, out_channels=3) # input Sketch 1channel + hint 3channel # UNET 모델 구조를 가져옴
 D = Discriminator(in_channels=3, out_channels=1)
 
-
+# 텐서보드에 Unet관련 그래프 넣기
 writer.add_graph(Unet, (Variable(torch.randn(1,2,4,256,256), requires_grad=True)[0], Variable(torch.randn(1,2,3,224,224), requires_grad=True)[0]))
 
-Unet = torch.nn.DataParallel(Unet, device_ids=eval(args.gpus)).cuda()
+# 가능한 cuda.device (GPU)는 1개
+print(torch.cuda.device_count())
+wait = input("PRESS ENTER TO CONTINUE.")
 
+# Generator
+Unet = torch.nn.DataParallel(Unet, device_ids=eval(args.gpus)).cuda() # 병렬처리 가능하게 만든 것. (AWS 상황에서는 무쓸모?)
+
+# Discriminator
 D = torch.nn.DataParallel(D, device_ids=eval(args.gpus)).cuda()
 
 cudnn.benchmark = True # faster convolutions, but more memory
@@ -72,11 +93,11 @@ cudnn.benchmark = True # faster convolutions, but more memory
 
 train_loader = torch.utils.data.DataLoader(
     ClothDataSet(
-        args.train_path,
-        args.sketch_path,
-        args.draft_path,
-        args.img_size,
-        args.re_size,
+        args.train_path, # color dataset
+        args.sketch_path, # sketch dataset
+        args.draft_path, # G에서 나온 값 다시 넣기**
+        args.img_size, # 256
+        args.re_size, # 256
         is_train = True
         ),
     batch_size=args.batch_size, shuffle=True,
@@ -167,12 +188,14 @@ def train_net(args, train_loader, Unet, D, epoch, save_epoch, last_count_train, 
         input=input.float()
         df=df.float()
         gt=gt.float()
-        input.size
+        input.size # 1, 256, 256
         df.size
 
         input = Variable(input)
         df = Variable(df)
         gt = Variable(gt)
+        
+        # ?? 1 for real : 
         label = Variable(torch.ones(input.size(0),int(gt.size(2)/8),int(gt.size(3)/8))) # 1 for real
         
         input = input.cuda()

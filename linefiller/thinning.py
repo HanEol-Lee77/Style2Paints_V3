@@ -1,8 +1,8 @@
 import numpy as np
 import cv2
 
-
-def thinning(fillmap, max_iter=100):
+# simulate 1 에서 쓰임**
+def thinning(fillmap, max_iter=100): # sketch(?) 그림이 input으로 들어오고, image가 output으로 나가는 듯
     """Fill area of line with surrounding fill color.
 
     # Arguments
@@ -13,7 +13,7 @@ def thinning(fillmap, max_iter=100):
         an image.
     """
     line_id = 0
-    h, w = fillmap.shape[:2]
+    h, w = fillmap.shape[:2] #  0  1  2: h,w가 저장됨..
     result = fillmap.copy()
 
     for iterNum in range(max_iter):

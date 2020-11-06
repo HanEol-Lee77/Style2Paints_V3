@@ -1,7 +1,7 @@
 # full assembly of the sub-parts to form the complete net
 
 import torch.nn.functional as F
-import pretrainedmodels
+# import pretrainedmodels
 
 import torch
 import torch.nn as nn
@@ -130,6 +130,8 @@ class UNet(nn.Module):
         self.up3 = up(768, 192, bilinear=False)
         self.up4 = up(384, 96, bilinear=False)
         self.up5 = up(192, 48, bilinear=False)
+        ## 192, 64가 아니라 192, 48로 맞춘 이유?? <Q>
+
         self.avg_pool = nn.AdaptiveAvgPool2d((1,1))#nn.AdaptiveAvgPool2d((1,1))#自适应最大还是平均池化
         # self.up2 = up(512, 128)
         # self.up3 = up(256, 64)

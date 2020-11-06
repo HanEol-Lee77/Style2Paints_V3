@@ -6,7 +6,7 @@
 
 import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID" # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"]="6"
+os.environ["CUDA_VISIBLE_DEVICES"]="3" # 원 코드에는 6으로 설정되어 있었음
 import tensorflow as tf
 gpu_options = tf.GPUOptions(allow_growth=True)
 sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
@@ -218,30 +218,30 @@ def test(Unet,args,gt,sk,df):
 
 # In[ ]:
 
+################################ 주석처리 start #################################
+# #输入图片预处理
+# from tqdm import tqdm
+# save_path = '/data6/wangpengxiao/hanfu/result'
+# hanfu_img = glob.glob(osp.join(args.hanfu_path,'*.jpg'))
+# hanfu_img = sorted(hanfu_img)
+# gt_img = glob.glob(osp.join(args.val_path,'*.jpg'))
+# gt_img = sorted(gt_img)
+# for i in range(len(hanfu_img)):
+#     sketch = edge_detecton(hanfu_img[i])
+#     sketch = Image.fromarray(sketch).convert('L')
+#     for j in tqdm(range(30)):
+#         p = gt_img[j]
+#         gt = Image.open(p).convert('RGB')
+#         df = Image.open(p).convert('RGB')
 
-#输入图片预处理
-from tqdm import tqdm
-save_path = '/data6/wangpengxiao/hanfu/result'
-hanfu_img = glob.glob(osp.join(args.hanfu_path,'*.jpg'))
-hanfu_img = sorted(hanfu_img)
-gt_img = glob.glob(osp.join(args.val_path,'*.jpg'))
-gt_img = sorted(gt_img)
-for i in range(len(hanfu_img)):
-    sketch = edge_detecton(hanfu_img[i])
-    sketch = Image.fromarray(sketch).convert('L')
-    for j in tqdm(range(30)):
-        p = gt_img[j]
-        gt = Image.open(p).convert('RGB')
-        df = Image.open(p).convert('RGB')
 
-
-        pic,pm = test(Unet,args,gt,sketch,df)
-        pm.save(osp.join(save_path,str(i)+'_'+str(j)+'point_map.jpg'))
-        pic = Image.fromarray((pic*255).astype('uint8'))
-        plt.imshow(pic)
-        gt.save(osp.join(save_path,str(i)+'_'+str(j)+'gt.jpg'))
-        pic.save(osp.join(save_path,str(i)+'_'+str(j)+'fake.jpg'))
-
+#         pic,pm = test(Unet,args,gt,sketch,df)
+#         pm.save(osp.join(save_path,str(i)+'_'+str(j)+'point_map.jpg'))
+#         pic = Image.fromarray((pic*255).astype('uint8'))
+#         plt.imshow(pic)
+#         gt.save(osp.join(save_path,str(i)+'_'+str(j)+'gt.jpg'))
+#         pic.save(osp.join(save_path,str(i)+'_'+str(j)+'fake.jpg'))
+################################ 주석처리 end #################################
 
 # In[ ]:
 

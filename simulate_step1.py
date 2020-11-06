@@ -2,6 +2,24 @@
 # coding: utf-8
 
 # In[ ]:
+#################=================== paths ===================#################
+region_picture_path = "/home/ubuntu/data/processed/yumi/region_picture" # line 251 # region_patch_save_path
+# trappedn_ball ** 활용
+
+source_data_path = "/home/ubuntu/data/processed/yumi/color" # line 166 #"/data4/wangpengxiao/danbooru2017/original"
+random_crop_path = "/home/ubuntu/data/processed/yumi/crop_picture" # line 181 #"/data4/wangpengxiao/zalando_random_crop"
+# random 하게 crop**
+
+patch_path = "/home/ubuntu/data/processed/yumi/patch_picture" # line 182 #"/data4/wangpengxiao/zalando_center_patch"
+
+
+
+#    'train_path' : '/home/ubuntu/data/processed/yumi/train/color',#'/data4/wangpengxiao/danbooru2017/original/train',
+#     'val_path' : '/home/ubuntu/data/processed/yumi/val/color',#'/data4/wangpengxiao/danbooru2017/original/val',
+#     'sketch_path' : '/home/ubuntu/data/processed/yumi/train/sketch',#"/data4/wangpengxiao/danbooru2017/original_sketch",
+#     'draft_path' : 'STL path',#"/data4/wangpengxiao/danbooru2017/original_STL",
+#     'save_path' : '/home/ubuntu/data/save/yumi',#"/data4/wangpengxiao/danbooru2017/result" ,
+#################=================== paths ===================#################
 
 
 import os
@@ -14,18 +32,19 @@ sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 from PIL import Image
 import os.path as osp
 import glob  
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 import cv2
 from keras.models import load_model
+
 from helper import *
 
-mod = load_model('mod.h5')
+# from keras.models import load_model
+# mod = load_model('mod.h5') # 모델 안씀.. weight.. 가 truncated 된 모델..
 
 
 # In[ ]:
-
 
 def RandomCenterCrop(path, min_size, max_size):
     '''
@@ -40,7 +59,6 @@ def RandomCenterCrop(path, min_size, max_size):
     left = np.random.randint(0, w - size)
 
     return img[top:size+top, left:size+left, :]
-
 
 # In[ ]:
 
@@ -65,11 +83,11 @@ def get_patch(path, min_patch_size, max_patch_size):
 # In[ ]:
 
 
-def edge_detecton(path):
+def edge_detection(path): # 이미 뽑았으므로 생략해도 됨**
     '''
     get sketch
     '''
-    from_mat = cv2.imread(path)
+    from_mat = cv2.imread(path) # 이미지를 matrix 형태로 불러오기*
     width = float(from_mat.shape[1])
     height = float(from_mat.shape[0])
     new_width = 0
@@ -102,16 +120,18 @@ def edge_detecton(path):
 # In[ ]:
 
 
-def get_mask(path):
+def get_mask(path): # 옷이 들어감
     '''
     提取衣服的mask
     返回numpy数组
+    옷의 마스크를 추출 **
+    numpy 배열 반환
     '''
     from linefiller.trappedball_fill import trapped_ball_fill_multi, flood_fill_multi, mark_fill, build_fill_map, merge_fill,     show_fill_map
     from linefiller.thinning import thinning
 
     im = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-    ret, binary = cv2.threshold(im, 220, 255, cv2.THRESH_BINARY)
+    ret, binary = cv2.threshold(im, 220, 255, cv2.THRESH_BINARY) # 255에서 220을 넘는 부분을 binary로 가져온다.
 
     fills = []
     result = binary
@@ -149,7 +169,7 @@ def get_mask(path):
 # In[ ]:
 
 
-source_data_path = "original image path"#"/data4/wangpengxiao/danbooru2017/original"
+# source_data_path = "original image path"#"/data4/wangpengxiao/danbooru2017/original"
 source_img_path = glob.glob(osp.join(source_data_path,'*/*.jpg'))
 source_img_path += glob.glob(osp.join(source_data_path,'*/*.png'))
 source_img_path = sorted(source_img_path)
@@ -164,8 +184,8 @@ source_img_path = sorted(source_img_path)
 # In[ ]:
 
 
-random_crop_path = "random crop save path"#"/data4/wangpengxiao/zalando_random_crop"
-patch_path = "small path save path"#"/data4/wangpengxiao/zalando_center_patch"
+# random_crop_path = "random crop save path"#"/data4/wangpengxiao/zalando_random_crop"
+# patch_path = "small path save path"#"/data4/wangpengxiao/zalando_center_patch"
 for path in  tqdm(source_img_path):
     try:
     #step1_1： make randomly croped rectangular patches 
@@ -192,6 +212,7 @@ from linefiller.thinning import thinning
 def get_region_picture(path):
     '''
     获取不规则形状的图片，背景是黑色0，方便rotate
+    불규칙한 모양의 사진을 얻으십시오. 배경은 검정색 0이며 회전하기 쉽습니다.
     '''
     im = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     ret, binary = cv2.threshold(im, 200, 255, cv2.THRESH_BINARY)
@@ -241,9 +262,8 @@ def get_region_picture(path):
 # In[ ]:
 
 
-region_picture_path = "region patch save path"#"/data4/wangpengxiao/danbooru2017/original_region_picture"
+# region_picture_path = "region_patch_save_path"#"/data4/wangpengxiao/danbooru2017/original_region_picture"
 for path in tqdm(source_img_path):
     rp_im = get_region_picture(path)
     cv2.imwrite(osp.join(region_picture_path, osp.basename(path)), rp_im)
     
-
