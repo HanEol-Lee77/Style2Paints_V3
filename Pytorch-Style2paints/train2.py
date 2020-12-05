@@ -208,9 +208,9 @@ cudnn.benchmark = True # faster convolutions, but more memory
 
 #####################################################################
 from dataloader import get_dataloader
-
+train_loader =
 # torch.utils.data.DataLoader
-train_loader = get_dataloader(
+    get_dataloader(
         dataset=args.dataset,
         phase=args.phase,
         workers=args.workers,
@@ -221,7 +221,7 @@ train_loader = get_dataloader(
         # num_workers=args.workers, # 중복
         pin_memory=True
     )
-    
+
     # dataset,
     # phase,
     # batch_size,

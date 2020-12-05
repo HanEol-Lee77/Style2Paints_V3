@@ -4,8 +4,6 @@ and return compressed representations (I-frames, motion vectors,
 or residuals) for training or testing.
 """
 
-
-
 import numpy as np
 import torch
 import torch.utils.data as data
@@ -19,20 +17,39 @@ import cv2
 import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 
-class ClothDataSet(data.Dataset):
-    def __init__(self, data_path, sketch_path, STL_path, img_size, re_size, is_train):
+############################========== 이 부분만 바꿔주면 됨 ===========########################################
 
-        region_picture_path = "/data4/wangpengxiao/zalando_region_picture"
+
+# # train_loader = torch.utils.data.DataLoader(
+#     ClothDataSet(
+#         args.train_path,
+#         args.sketch_path,
+#         args.draft_path,
+#         args.img_size,
+#         args.re_size,
+#         is_train = True
+#          ),
+#     #
+#     # batch_size=args.batch_size, shuffle=True,
+#     # num_workers=args.workers, pin_memory=True)
+
+class ClothDataSet(data.Dataset):
+                    #  train_path, sketch_path, draft_path, img_widht, img_height, re_size, 
+    def __init__(self, data_path, sketch_path, STL_path, img_width, img_height, re_size, is_train):
+
+        # region_picture_path = "/data4/wangpengxiao/zalando_region_picture"
+        region_picture_path = "./data"
         region_img_path = glob.glob(osp.join(region_picture_path,'*.jpg')) 
         region_img_path = sorted(region_img_path)
 
         self._data_path = data_path
         self._sketch_path = sketch_path
-        self._STL_path = STL_path
-        self._img_size = img_size
-        self._re_size = re_size
-        self._is_train = is_train
-        self.region_img_path = region_img_path
+        self._STL_path = STL_path #$#$ ?? STL?
+        self._img_width = img_width # width, height
+        self._img_height = img_height # width, height
+        self._re_size = re_size # ============ @@
+        self._is_train = is_train # ============ #$#$
+        self.region_img_path = region_img_path # ============
 
         self._get_ground_truth()
         self._inception_transform = transforms.Compose(
@@ -120,6 +137,9 @@ class ClothDataSet(data.Dataset):
 
     def __len__(self):
         return len(self.gt_img)
+
+
+
 
 
 def make_draft(STL, region_img_path):
@@ -257,4 +277,4 @@ def min_dis(point, point_list):
     for p in point_list:
         dis.append(np.sqrt(np.sum(np.square(np.array(point)-np.array(p)))))
     
-    return min(dis) 
+    return min(dis)
